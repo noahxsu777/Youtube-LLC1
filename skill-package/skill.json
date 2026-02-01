@@ -1,0 +1,41 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "es-ES": {
+          "summary": "Reproduce videos de YouTube con Alexa",
+          "examplePhrases": [
+            "Alexa, abre reproductor de YouTube",
+            "Alexa, pregunta a YouTube Reproductor por música",
+            "Alexa, pide a YouTube Reproductor que busque videos"
+          ],
+          "keywords": [
+            "youtube",
+            "video",
+            "música",
+            "reproductor"
+          ],
+          "name": "YouTube Reproductor",
+          "description": "Esta skill te permite buscar y reproducir videos de YouTube mediante comandos de voz. Puedes buscar por nombre de canción, artista o cualquier término de búsqueda."
+        }
+      },
+      "isAvailableWorldwide": true,
+      "testingInstructions": "1. Invoca la skill diciendo 'Alexa, abre reproductor de YouTube'\n2. Di 'busca [nombre del video]' para buscar videos\n3. Di 'reproduce' para reproducir el primer resultado\n4. Di 'pausa', 'reanuda', 'siguiente' o 'anterior' para controlar la reproducción",
+      "category": "MUSIC_AND_AUDIO",
+      "distributionCountries": []
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "sourceDir": "lambda/custom"
+        },
+        "interfaces": [
+          {
+            "type": "AUDIO_PLAYER"
+          }
+        ]
+      }
+    },
+    "manifestVersion": "1.0"
+  }
+}
