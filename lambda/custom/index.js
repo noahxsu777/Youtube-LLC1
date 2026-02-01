@@ -2,11 +2,6 @@ const Alexa = require('ask-sdk-core');
 const ytsr = require('ytsr');
 const ytdl = require('ytdl-core');
 
-// Variables globales para mantener el estado
-let searchResults = [];
-let currentIndex = 0;
-let currentQuery = '';
-
 // Handler para cuando se abre la skill
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -39,14 +34,15 @@ const SearchIntentHandler = {
                 .getResponse();
         }
         
-        currentQuery = query;
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        sessionAttributes.currentQuery = query;
         
         try {
             // Buscar videos en YouTube
             const searchResults_temp = await ytsr(query, { limit: 5 });
             
             // Filtrar solo videos (no playlists ni canales)
-            searchResults = searchResults_temp.items.filter(item => item.type === 'video');
+            const searchResults = searchResults_temp.items.filter(item => item.type === 'video');
             
             if (searchResults.length === 0) {
                 const speakOutput = `No encontré resultados para "${query}". Intenta con otra búsqueda.`;
@@ -56,7 +52,10 @@ const SearchIntentHandler = {
                     .getResponse();
             }
             
-            currentIndex = 0;
+            sessionAttributes.searchResults = searchResults;
+            sessionAttributes.currentIndex = 0;
+            handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+            
             const firstVideo = searchResults[0];
             
             const speakOutput = `Encontré ${searchResults.length} videos. El primero es "${firstVideo.title}" de ${firstVideo.author.name}. ¿Quieres que lo reproduzca?`;
@@ -84,6 +83,9 @@ const PlayIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'PlayIntent';
     },
     async handle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const searchResults = sessionAttributes.searchResults || [];
+        
         if (searchResults.length === 0) {
             const speakOutput = 'Primero debes buscar un video. Di "busca" seguido del nombre del video que quieres encontrar.';
             return handlerInput.responseBuilder
@@ -92,6 +94,7 @@ const PlayIntentHandler = {
                 .getResponse();
         }
         
+        const currentIndex = sessionAttributes.currentIndex || 0;
         const video = searchResults[currentIndex];
         
         try {
@@ -154,6 +157,9 @@ const ResumeIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.ResumeIntent';
     },
     async handle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const searchResults = sessionAttributes.searchResults || [];
+        
         if (searchResults.length === 0) {
             const speakOutput = 'No hay nada para reanudar. Busca un video primero.';
             return handlerInput.responseBuilder
@@ -161,6 +167,7 @@ const ResumeIntentHandler = {
                 .getResponse();
         }
         
+        const currentIndex = sessionAttributes.currentIndex || 0;
         const video = searchResults[currentIndex];
         
         try {
@@ -198,6 +205,9 @@ const NextIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NextIntent';
     },
     async handle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const searchResults = sessionAttributes.searchResults || [];
+        
         if (searchResults.length === 0) {
             const speakOutput = 'No hay videos en la lista. Busca algo primero.';
             return handlerInput.responseBuilder
@@ -205,7 +215,10 @@ const NextIntentHandler = {
                 .getResponse();
         }
         
-        currentIndex = (currentIndex + 1) % searchResults.length;
+        const currentIndex = ((sessionAttributes.currentIndex || 0) + 1) % searchResults.length;
+        sessionAttributes.currentIndex = currentIndex;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        
         const video = searchResults[currentIndex];
         
         try {
@@ -246,6 +259,9 @@ const PreviousIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.PreviousIntent';
     },
     async handle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        const searchResults = sessionAttributes.searchResults || [];
+        
         if (searchResults.length === 0) {
             const speakOutput = 'No hay videos en la lista. Busca algo primero.';
             return handlerInput.responseBuilder
@@ -253,7 +269,10 @@ const PreviousIntentHandler = {
                 .getResponse();
         }
         
-        currentIndex = (currentIndex - 1 + searchResults.length) % searchResults.length;
+        const currentIndex = ((sessionAttributes.currentIndex || 0) - 1 + searchResults.length) % searchResults.length;
+        sessionAttributes.currentIndex = currentIndex;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        
         const video = searchResults[currentIndex];
         
         try {
