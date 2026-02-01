@@ -1,0 +1,23 @@
+{
+  "name": "youtube-alexa-skill",
+  "version": "1.0.0",
+  "description": "Alexa Skill para buscar y reproducir videos de YouTube",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "keywords": [
+    "alexa",
+    "youtube",
+    "skill",
+    "audio"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ask-sdk-core": "^2.13.0",
+    "ask-sdk-model": "^1.41.1",
+    "ytdl-core": "^4.11.5",
+    "ytsr": "^3.8.4"
+  }
+}
